@@ -1,5 +1,5 @@
 manifest.mi
 build.xml
-./nbprojects
-./test
-./build
+nbprojects/
+test/
+build/
