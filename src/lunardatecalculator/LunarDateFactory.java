@@ -15,7 +15,7 @@ import net.fortuna.ical4j.model.property.RRule;
 
 /**
  *
- * @author cpu10360
+ * @author Long Le
  */
 public class LunarDateFactory {
 

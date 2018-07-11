@@ -14,7 +14,7 @@ import net.fortuna.ical4j.model.parameter.Value;
 
 /**
  *
- * @author cpu10360
+ * @author Long Le
  */
 public class LunarDateCalculator {
 
@@ -36,17 +36,5 @@ public class LunarDateCalculator {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        /*
-        try {
-            Date date = new Date("20180711");
-            LunarDateFactory ldfactory = new LunarDateFactory();
-            DateList list = new DateList();
-            list.add(ldfactory.fromSolarToLunar(date, 7));
-            System.out.println(list.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-         */
     }
 }
