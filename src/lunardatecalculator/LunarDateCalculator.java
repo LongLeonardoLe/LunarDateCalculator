@@ -23,7 +23,8 @@ public class LunarDateCalculator {
      */
     public static void main(String[] args) {
         try {
-            Date until = new Date("20181231");
+            /*
+            Date until = new Date("20180813");
             Date start = new Date();
 
             RRule rule = new RRule();
@@ -32,6 +33,10 @@ public class LunarDateCalculator {
             LunarDateFactory factory = new LunarDateFactory();
             DateList lunarList = factory.getLunarDateList(start, rule);
             System.out.println(lunarList.toString());
+            */
+            LunarDateFactory factory = new LunarDateFactory();
+            Date date = new Date("16480415");
+            System.out.println(factory.fromSolarToLunar(date, 7).toString());
             
         } catch (ParseException e) {
             e.printStackTrace();

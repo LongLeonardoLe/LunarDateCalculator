@@ -36,10 +36,10 @@ public class LunarDateFactory {
         int y = yy + 4800 - a;
         int m = mm + 12 * a - 3;
 
-        int juliusDay = dd + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
+        int juliusDay = dd + ((153 * m + 2) / 5) + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
         // Check for dates before Gergorian Calendar
         if (juliusDay < 2299161) {
-            juliusDay = dd + (153 * m + 2) / 5 + 365 * y + y / 4 - 32083;
+            juliusDay = dd + ((153 * m + 2) / 5) + 365 * y + y / 4 - 32083;
         }
 
         return juliusDay;
@@ -77,7 +77,7 @@ public class LunarDateFactory {
         C1 = C1 - 0.0004 * Math.sin(degree * (2 * moonArgsLatitude - sunMeanAnomaly)) - 0.0006 * Math.sin(degree * (2 * moonArgsLatitude + moonMeanAnomaly));
         C1 = C1 + 0.0010 * Math.sin(degree * (2 * moonArgsLatitude - moonMeanAnomaly)) + 0.0005 * Math.sin(degree * (2 * moonMeanAnomaly + sunMeanAnomaly));
 
-        double deltaCT = 0;
+        double deltaCT;
         if (centuriesTime < -11.0) {
             deltaCT = 0.001 + 0.000839 * centuriesTime + 0.0002261 * centuriesTimePow2 - 0.00000845 * centuriesTimePow3 - 0.000000081 * centuriesTime * centuriesTimePow3;
         } else {
@@ -135,11 +135,13 @@ public class LunarDateFactory {
         int newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
         if (newMoonDay == juliusDay) {
             juliusDay--;
+            off = juliusDay - 2415021;
+            numOfLunarMonths = (int) ((double) off / 29.530588853);
+            newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
+        } else if (newMoonDay > juliusDay) {
+            numOfLunarMonths--;
+            newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
         }
-
-        off = juliusDay - 2415021;
-        numOfLunarMonths = (int) ((double) off / 29.530588853);
-        newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
 
         int sunLongitude = this.getSunLongitude(newMoonDay, timeZone);
         if (sunLongitude >= 9) {
@@ -158,7 +160,7 @@ public class LunarDateFactory {
      * @return offset of leap month
      */
     public int getLeapMonthOffset(int month11, int timezone) {
-        int numOfLunarMonths = (int) (((double) month11 - 2415021) / 29.530588853);
+        int numOfLunarMonths = (int) (((double) month11 - 2415021.076998695) / 29.530588853 + 0.5);
         int last = 0;
         int i = 1;
         int sunLongitude = this.getSunLongitude(this.getNewMoonDay(numOfLunarMonths + i, timezone), timezone);
@@ -181,17 +183,26 @@ public class LunarDateFactory {
     public Date fromSolarToLunar(Date solar, int timeZone) throws ParseException {
         String sdate = solar.toString();
         int yy = Integer.parseInt(sdate.substring(0, 4));
-        int lunarYear = 0;
-        int lunarMonth = 0;
-        int lunarDay = 0;
+        int lunarYear;
+        int lunarMonth;
+        int lunarDay;
 
         int juliusDay = this.getJuliusDay(solar);
 
         int numOfLunarMonths = (int) (((double) juliusDay - 2415021.076998695) / 29.530588853);
+        int newMoonDay;
 
-        int newMoonDay = this.getNewMoonDay(numOfLunarMonths + 1, timeZone);
-        if (newMoonDay > juliusDay) {
+        if (numOfLunarMonths >= 0) {
+            newMoonDay = this.getNewMoonDay(numOfLunarMonths + 1, timeZone);
+            if (newMoonDay > juliusDay) {
+                newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
+            }
+        } 
+        else {
             newMoonDay = this.getNewMoonDay(numOfLunarMonths, timeZone);
+            if (newMoonDay > juliusDay) {
+                newMoonDay = this.getNewMoonDay(numOfLunarMonths - 1, timeZone);
+            }
         }
 
         int month11 = this.getLunarMonth11(yy, timeZone);
@@ -211,7 +222,7 @@ public class LunarDateFactory {
         lunarMonth = diff + 11;
         if (bmonth11 - month11 > 365) {
             int leapMonthDiff = this.getLeapMonthOffset(month11, timeZone);
-            if (diff >= leapMonthDiff - 1) {
+            if (diff >= leapMonthDiff) {
                 lunarMonth = diff + 10;
             }
         }
